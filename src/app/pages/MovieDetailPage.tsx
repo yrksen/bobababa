@@ -1777,7 +1777,7 @@ export function MovieDetailPage({ currentUser, setCurrentUser }: MovieDetailPage
                                                     </div>
                                                     {subReply.text && <p className="text-[rgba(16,11,9,0.75)] dark:text-[rgba(247,241,237,0.75)] text-[11px] leading-relaxed">{subReply.text}</p>}
                                                     {subReply.imageUrl && <img src={subReply.imageUrl} alt="sub-reply media" className="mt-1.5 max-h-36 rounded-lg object-contain border border-[rgba(208,115,57,0.15)]" onError={(e) => e.currentTarget.style.display = 'none'} />}
-                                                    <div className="flex items-center gap-0.5 flex-wrap mt-1.5">
+                                                    <div className="flex items-center justify-between gap-0.5 mt-1.5">
                                                       {EMOJIS.map(emoji => {
                                                         const users = subReplyReactions[emoji] || [];
                                                         const hasReacted = users.includes(userId);
