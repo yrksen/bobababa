@@ -1788,12 +1788,14 @@ export function MovieDetailPage({ currentUser, setCurrentUser }: MovieDetailPage
                                                           </button>
                                                         );
                                                       })}
-                                                      <button
-  onClick={() => { setReplyingToId(comment.id); setReplyingToReplyId(subReply.id); setReplyingToUsername(subReply.username); setReplyText(''); setReplyImageUrl(''); setShowReplyImageInput(false); }}
-  className="text-[rgba(16,11,9,0.3)] dark:text-[rgba(247,241,237,0.3)] hover:text-[#d07339] dark:hover:text-[#c36a32] transition-colors flex items-center gap-1 text-[10px] ml-auto hover:opacity-70"
->
-  <Reply className="size-2.5" />Reply
-</button>
+                                                      <div className="flex items-center gap-1">
+  <span className="text-[rgba(208,115,57,0.9)] dark:text-[rgba(195,106,50,0.9)] text-[10px]">@{reply.username}</span>
+  <button
+    onClick={() => { setReplyingToId(comment.id); setReplyingToReplyId(subReply.id); setReplyingToUsername(subReply.username); setReplyText(''); setReplyImageUrl(''); setShowReplyImageInput(false); }}
+    className="text-[rgba(16,11,9,0.3)] dark:text-[rgba(247,241,237,0.3)] hover:text-[#d07339] dark:hover:text-[#c36a32] transition-colors flex items-center gap-1 text-[10px] hover:opacity-70"
+  >
+    <Reply className="size-2.5" />Reply
+  </button>
 </div>
                                                    </div>
 
