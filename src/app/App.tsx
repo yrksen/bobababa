@@ -131,6 +131,13 @@ function HomePage({ currentUser, setCurrentUser, isDarkMode, setIsDarkMode }: { 
       ]);
     };
     loadData();
+
+  const interval = setInterval(() => {
+    loadComments();
+  }, 3000);
+
+  return () => clearInterval(interval);
+
   }, []);
 
   // Save dark mode preference
