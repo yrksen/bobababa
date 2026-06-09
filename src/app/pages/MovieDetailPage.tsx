@@ -1807,6 +1807,12 @@ export function MovieDetailPage({ currentUser, setCurrentUser }: MovieDetailPage
                                               {makeReplyForm(reply.id)}
                                             </div>
                                           )}
+                                          {/* Reply form inline under this specific level-2 reply */}
+{replyingToId === comment.id && replyingToReplyId === subReply.id && (
+  <div className="ml-7 mt-1 pl-3 border-l-2 border-[rgba(208,115,57,0.12)] dark:border-[rgba(126,62,21,0.2)]">
+    {makeReplyForm(subReply.id)}
+  </div>
+)}
                                         </div>
                                       )}
                                     </div>
