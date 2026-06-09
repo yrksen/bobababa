@@ -1055,47 +1055,53 @@ function HomePage({ currentUser, setCurrentUser, isDarkMode, setIsDarkMode }: { 
     navigate(`/movie/${createSlug(randomMovie.title, randomMovie.year)}`);
   };
 
-  const handleAddComment = async (movieId: number, text: string) => {
-    const { text: commentText, username } = JSON.parse(text);
-    
-    const newComment: Comment = {
-      id: Date.now().toString(),
-      movieId,
-      text: commentText,
-      username,
-      timestamp: Date.now(),
-    };
-    
-    const updatedComments = [...comments, newComment];
-    
-    try {
-      const response = await fetch(`${API_BASE_URL}/comments`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${publicAnonKey}`,
-        },
-        body: JSON.stringify(newComment),
-      });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      if (data.success) {
-        setComments(updatedComments);
-      } else {
-        console.error('Error adding comment to backend:', data.error);
-        setComments(updatedComments);
-      }
-    } catch (error) {
-      console.error('Error saving comment to backend, saving to localStorage only:', error);
-      setComments(updatedComments);
-    }
+const handleAddComment = async (movieId: number, text: string) => {
+  const { text: commentText, username } = JSON.parse(text);
+  
+  const newComment: Comment = {
+    id: Date.now().toString(),
+    movieId,
+    text: commentText,
+    username,
+    timestamp: Date.now(),
   };
+  
+  // Optimistically add to local state
+  const updatedComments = [...comments, newComment];
+  setComments(updatedComments);
+  
+  try {
+    const response = await fetch(`${API_BASE_URL}/comments`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${publicAnonKey}`,
+      },
+      body: JSON.stringify(newComment),
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    if (data.success) {
+      await loadComments(); // Verify with backend
+    } else {
+      console.error('Error adding comment to backend:', data.error);
+      await loadComments(); // Reload if failed
+    }
+  } catch (error) {
+    console.error('Error saving comment to backend:', error);
+    await loadComments(); // Reload on error
+  }
+};
 
-  const handleDeleteComment = async (movieId: number, commentId: string) => {
+const handleDeleteComment = async (movieId: number, commentId: string) => {
+  // Immediately remove from local state
+  const updatedComments = comments.filter(c => c.id !== commentId);
+  setComments(updatedComments);
+  
   try {
     const response = await fetch(`${API_BASE_URL}/comments/${movieId}/${commentId}`, {
       method: 'DELETE',
@@ -1111,16 +1117,17 @@ function HomePage({ currentUser, setCurrentUser, isDarkMode, setIsDarkMode }: { 
     const data = await response.json();
 
     if (data.success) {
-      await loadComments(); // ✅ ALWAYS reload from backend
+      await loadComments(); // Verify with backend
     } else {
       console.error('Error deleting comment from backend:', data.error);
+      await loadComments(); // Reload if failed
     }
 
   } catch (error) {
     console.error('Error deleting comment from backend:', error);
+    await loadComments(); // Reload on error
   }
 };
-
   // Get all unique tags from movies (memoized)
   const allTags = useMemo(() => 
     Array.from(
