@@ -266,46 +266,31 @@ function HomePage({ currentUser, setCurrentUser, isDarkMode, setIsDarkMode }: { 
     }
   };
 
-  const loadComments = async () => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/comments`, {
-        headers: {
-          'Authorization': `Bearer ${publicAnonKey}`,
-        },
-      });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      if (data.success) {
-        setComments(data.comments);
-        localStorage.setItem('comments', JSON.stringify(data.comments));
-      } else {
-        console.error('Error loading comments:', data.error);
-        loadCommentsFromLocalStorage();
-      }
-    } catch (error) {
-      console.error('Error fetching comments from backend, using localStorage:', error);
-      loadCommentsFromLocalStorage();
-    }
-  };
+ const loadComments = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/comments`, {
+      headers: {
+        Authorization: `Bearer ${publicAnonKey}`,
+      },
+    });
 
-  const loadCommentsFromLocalStorage = () => {
-    const stored = localStorage.getItem("comments");
-    if (stored) {
-      try {
-        const parsedComments = JSON.parse(stored);
-        setComments(parsedComments);
-      } catch (error) {
-        console.error('Error parsing comments:', error);
-        setComments([]);
-      }
-    } else {
-      setComments([]);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
-  };
+
+    const data = await response.json();
+
+    if (data.success) {
+      setComments(data.comments); // ✅ only this
+    } else {
+      console.error('Error loading comments:', data.error);
+      setComments([]); // ✅ fallback = empty (not old data)
+    }
+  } catch (error) {
+    console.error('Error fetching comments:', error);
+    setComments([]); // ✅ no localStorage
+  }
+};
 
   const loadRatings = async () => {
     try {
@@ -1100,16 +1085,13 @@ function HomePage({ currentUser, setCurrentUser, isDarkMode, setIsDarkMode }: { 
       const data = await response.json();
       if (data.success) {
         setComments(updatedComments);
-        localStorage.setItem('comments', JSON.stringify(updatedComments));
       } else {
         console.error('Error adding comment to backend:', data.error);
         setComments(updatedComments);
-        localStorage.setItem('comments', JSON.stringify(updatedComments));
       }
     } catch (error) {
       console.error('Error saving comment to backend, saving to localStorage only:', error);
       setComments(updatedComments);
-      localStorage.setItem('comments', JSON.stringify(updatedComments));
     }
   };
 
@@ -1131,16 +1113,16 @@ function HomePage({ currentUser, setCurrentUser, isDarkMode, setIsDarkMode }: { 
       const data = await response.json();
       if (data.success) {
         setComments(updatedComments);
-        localStorage.setItem('comments', JSON.stringify(updatedComments));
+        
       } else {
         console.error('Error deleting comment from backend:', data.error);
         setComments(updatedComments);
-        localStorage.setItem('comments', JSON.stringify(updatedComments));
+        
       }
     } catch (error) {
       console.error('Error deleting comment from backend, deleting from localStorage only:', error);
       setComments(updatedComments);
-      localStorage.setItem('comments', JSON.stringify(updatedComments));
+      
     }
   };
 
