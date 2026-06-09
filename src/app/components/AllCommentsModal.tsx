@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { X, User, MessageCircle, Image } from "lucide-react";
 import type { Movie } from "./MovieCard";
 
@@ -19,9 +19,16 @@ interface AllCommentsModalProps {
   onCommentClick: (movie: Movie) => void;
   onClose: () => void;
   isDarkMode: boolean;
+  onRefresh?: () => Promise<void>;
 }
 
-export function AllCommentsModal({ comments, movies, onCommentClick, onClose, isDarkMode }: AllCommentsModalProps) {
+export function AllCommentsModal({ comments, movies, onCommentClick, onClose, isDarkMode, onRefresh }: AllCommentsModalProps) {
+  useEffect(() => {
+    if (onRefresh) {
+      onRefresh();
+    }
+  }, []);
+
   const sorted = [...comments].sort((a, b) => b.timestamp - a.timestamp);
 
   const handleBackdrop = (e: React.MouseEvent) => {

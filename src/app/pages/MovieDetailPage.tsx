@@ -1592,12 +1592,15 @@ export function MovieDetailPage({ currentUser, setCurrentUser }: MovieDetailPage
                       .filter(c => !c.parentId)
                       .sort((a, b) => a.timestamp - b.timestamp)
                       .map((comment) => {
-                        const replies = comments.filter(c => c.parentId === comment.id).sort((a, b) => a.timestamp - b.timestamp);
                         const commentReactions = reactions[String(comment.id)] || {};
                         const userId = currentUser ? currentUser.username : getAnonymousUserId();
+                        // Direct replies to this top-level comment only
+                        const directReplies = comments
+                          .filter(c => c.parentId === comment.id)
+                          .sort((a, b) => a.timestamp - b.timestamp);
 
-                        // Shared reply form JSX
-                        const replyForm = (
+                        // Reusable inline reply form — receives the exact parentId to post under
+                        const makeReplyForm = (targetParentId: number) => (
                           <div className="mt-2 space-y-2">
                             {!currentUser && (
                               <input
@@ -1642,14 +1645,14 @@ export function MovieDetailPage({ currentUser, setCurrentUser }: MovieDetailPage
                               <button onClick={() => setShowReplyGifPicker(true)} className="px-2.5 py-1.5 text-[12px] rounded-lg border transition-colors border-[#eea77a] dark:border-[#7e3e15] text-[rgba(16,11,9,0.6)] dark:text-[rgba(247,241,237,0.6)] hover:bg-[rgba(238,167,122,0.1)]">GIF</button>
                               <button onClick={() => { setShowReplyImageInput(!showReplyImageInput); if (showReplyImageInput) setReplyImageUrl(''); }} className={`px-2.5 py-1.5 text-[12px] rounded-lg border transition-colors flex items-center gap-1 ${showReplyImageInput ? 'bg-[rgba(208,115,57,0.15)] border-[#d07339] text-[#d07339]' : 'border-[#eea77a] dark:border-[#7e3e15] text-[rgba(16,11,9,0.6)] dark:text-[rgba(247,241,237,0.6)] hover:bg-[rgba(238,167,122,0.1)]'}`}><ImageIcon className="size-3" />Image</button>
                               <button onClick={() => { setReplyingToId(null); setReplyingToReplyId(null); setReplyingToUsername(''); setReplyText(''); setReplyImageUrl(''); setShowReplyImageInput(false); }} className="px-3 py-1.5 text-[12px] rounded-lg border border-[#eea77a] dark:border-[#7e3e15] text-[rgba(16,11,9,0.6)] dark:text-[rgba(247,241,237,0.6)] hover:bg-[rgba(238,167,122,0.1)] transition-colors">Cancel</button>
-                              <button onClick={() => handleAddReply(comment.id)} className="flex-1 px-3 py-1.5 text-[12px] font-medium rounded-lg bg-[#d07339] hover:bg-[#b8622e] dark:bg-[#c36a32] dark:hover:bg-[#a85a28] text-white transition-colors">Post Reply</button>
+                              <button onClick={() => handleAddReply(targetParentId)} className="flex-1 px-3 py-1.5 text-[12px] font-medium rounded-lg bg-[#d07339] hover:bg-[#b8622e] dark:bg-[#c36a32] dark:hover:bg-[#a85a28] text-white transition-colors">Post Reply</button>
                             </div>
                           </div>
                         );
 
                         return (
                           <div key={comment.id}>
-                            {/* Parent Comment */}
+                            {/* ── Top-level comment ── */}
                             <div className="border border-[rgba(208,115,57,0.15)] dark:border-[rgba(126,62,21,0.25)] rounded-lg p-4 hover:bg-[rgba(238,167,122,0.05)] dark:hover:bg-[rgba(126,62,21,0.07)] transition-colors">
                               <div className="flex items-start gap-3">
                                 <div className={`w-9 h-9 rounded-full flex items-center justify-center overflow-hidden shrink-0 ${isDarkMode ? 'bg-[rgba(126,62,21,0.3)]' : 'bg-[rgba(208,115,57,0.15)]'}`}>
@@ -1667,9 +1670,9 @@ export function MovieDetailPage({ currentUser, setCurrentUser }: MovieDetailPage
                                     </div>
                                     <button onClick={() => handleDeleteComment(comment.id, comment.username)} className="text-red-500/50 hover:text-red-600 dark:text-red-500/40 dark:hover:text-red-400 transition-colors"><Trash2 className="size-3.5" /></button>
                                   </div>
-                                  {comment.text && <p className="text-[rgba(16,11,9,0.8)] dark:text-[rgba(247,241,237,0.8)] text-[13px] leading-relaxed">{comment.text}</p>}
-                                  {comment.imageUrl && <img src={comment.imageUrl} alt="comment media" className="mt-2 max-h-60 rounded-lg object-contain border border-[rgba(208,115,57,0.2)]" onError={(e) => e.currentTarget.style.display = 'none'} />}
-                                  <div className="flex items-center justify-between mt-2.5 pt-2 border-t border-[rgba(208,115,57,0.08)] dark:border-[rgba(126,62,21,0.12)]">
+                                  {comment.text && <p className="text-[rgba(16,11,9,0.8)] dark:text-[rgba(247,241,237,0.8)] text-[13px] leading-relaxed mb-2">{comment.text}</p>}
+                                  {comment.imageUrl && <img src={comment.imageUrl} alt="comment media" className="mb-2 max-h-48 rounded-lg object-contain border border-[rgba(208,115,57,0.2)]" onError={(e) => e.currentTarget.style.display = 'none'} />}
+                                  <div className="flex items-center justify-between mt-1">
                                     <div className="flex items-center gap-1 flex-wrap">
                                       {EMOJIS.map(emoji => {
                                         const users = commentReactions[emoji] || [];
@@ -1693,20 +1696,26 @@ export function MovieDetailPage({ currentUser, setCurrentUser }: MovieDetailPage
                               </div>
                             </div>
 
-                            {/* Reply form when replying directly to parent (no specific reply targeted) */}
+                            {/* Reply form directly under the top-level comment */}
                             {replyingToId === comment.id && replyingToReplyId === null && (
                               <div className="ml-8 mt-1 pl-4 border-l-2 border-[rgba(208,115,57,0.2)] dark:border-[rgba(126,62,21,0.3)]">
-                                {replyForm}
+                                {makeReplyForm(comment.id)}
                               </div>
                             )}
 
-                            {/* Replies thread */}
-                            {(replies.length > 0 || (replyingToId === comment.id && replyingToReplyId !== null)) && (
+                            {/* ── Level-1 replies: direct replies to the top-level comment ── */}
+                            {directReplies.length > 0 && (
                               <div className="ml-8 mt-1 space-y-1 border-l-2 border-[rgba(208,115,57,0.2)] dark:border-[rgba(126,62,21,0.3)] pl-4">
-                                {replies.map((reply) => {
+                                {directReplies.map((reply) => {
                                   const replyReactions = reactions[String(reply.id)] || {};
+                                  // Level-2: replies specifically to this reply
+                                  const subReplies = comments
+                                    .filter(c => c.parentId === reply.id)
+                                    .sort((a, b) => a.timestamp - b.timestamp);
+
                                   return (
                                     <div key={reply.id}>
+                                      {/* Level-1 reply bubble */}
                                       <div className="border border-[rgba(208,115,57,0.1)] dark:border-[rgba(126,62,21,0.15)] rounded-lg p-3 bg-[rgba(238,167,122,0.04)] dark:bg-[rgba(126,62,21,0.05)]">
                                         <div className="flex items-start gap-2.5">
                                           <div className={`w-7 h-7 rounded-full flex items-center justify-center overflow-hidden shrink-0 ${isDarkMode ? 'bg-[rgba(126,62,21,0.3)]' : 'bg-[rgba(208,115,57,0.15)]'}`}>
@@ -1746,8 +1755,53 @@ export function MovieDetailPage({ currentUser, setCurrentUser }: MovieDetailPage
                                         </div>
                                       </div>
 
-                                      {/* Reply form appears directly after the targeted reply */}
-                                      {replyingToId === comment.id && replyingToReplyId === reply.id && replyForm}
+                                      {/* ── Level-2 sub-thread: one per each reply being replied to ── */}
+                                      {(subReplies.length > 0 || (replyingToId === comment.id && replyingToReplyId === reply.id)) && (
+                                        <div className="ml-7 mt-1 space-y-1 border-l-2 border-[rgba(208,115,57,0.12)] dark:border-[rgba(126,62,21,0.2)] pl-3">
+                                          {subReplies.map((subReply) => {
+                                            const subReplyReactions = reactions[String(subReply.id)] || {};
+                                            return (
+                                              <div key={subReply.id} className="border border-[rgba(208,115,57,0.08)] dark:border-[rgba(126,62,21,0.12)] rounded-lg p-2.5 bg-[rgba(238,167,122,0.03)] dark:bg-[rgba(126,62,21,0.04)]">
+                                                <div className="flex items-start gap-2">
+                                                  <div className={`w-6 h-6 rounded-full flex items-center justify-center overflow-hidden shrink-0 ${isDarkMode ? 'bg-[rgba(126,62,21,0.25)]' : 'bg-[rgba(208,115,57,0.12)]'}`}>
+                                                    {subReply.profilePicture ? <img src={subReply.profilePicture} alt={subReply.username} className="w-full h-full object-cover" /> : <User className="size-3 text-[rgba(16,11,9,0.5)] dark:text-[rgba(247,241,237,0.5)]" />}
+                                                  </div>
+                                                  <div className="flex-1 min-w-0">
+                                                    <div className="flex justify-between items-start mb-0.5">
+                                                      <div className="flex items-baseline gap-1 flex-wrap">
+                                                        <span className="font-semibold text-[#100b09] dark:text-[#f7f1ed] text-[11px]">{subReply.username}</span>
+                                                        <span className="text-[rgba(208,115,57,0.9)] dark:text-[rgba(195,106,50,0.9)] text-[10px]">@{reply.username}</span>
+                                                        <span className="text-[10px] text-[rgba(16,11,9,0.4)] dark:text-[rgba(247,241,237,0.4)]">{new Date(subReply.timestamp).toLocaleDateString()}</span>
+                                                      </div>
+                                                      <button onClick={() => handleDeleteComment(subReply.id, subReply.username)} className="text-red-500/50 hover:text-red-600 dark:text-red-500/40 dark:hover:text-red-400 transition-colors ml-1 shrink-0"><Trash2 className="size-2.5" /></button>
+                                                    </div>
+                                                    {subReply.text && <p className="text-[rgba(16,11,9,0.75)] dark:text-[rgba(247,241,237,0.75)] text-[11px] leading-relaxed">{subReply.text}</p>}
+                                                    {subReply.imageUrl && <img src={subReply.imageUrl} alt="sub-reply media" className="mt-1.5 max-h-36 rounded-lg object-contain border border-[rgba(208,115,57,0.15)]" onError={(e) => e.currentTarget.style.display = 'none'} />}
+                                                    <div className="flex items-center gap-0.5 flex-wrap mt-1.5">
+                                                      {EMOJIS.map(emoji => {
+                                                        const users = subReplyReactions[emoji] || [];
+                                                        const hasReacted = users.includes(userId);
+                                                        return (
+                                                          <button key={emoji} onClick={() => handleReact(subReply.id, emoji)} className={`flex items-center gap-0.5 px-1 py-0.5 rounded-full text-[11px] transition-all ${hasReacted ? 'bg-[rgba(208,115,57,0.2)] border border-[rgba(208,115,57,0.5)]' : 'border border-transparent hover:bg-[rgba(238,167,122,0.12)] dark:hover:bg-[rgba(126,62,21,0.15)]'}`}>
+                                                            <span>{emoji}</span>
+                                                            {users.length > 0 && <span className="text-[9px] font-medium text-[rgba(16,11,9,0.6)] dark:text-[rgba(247,241,237,0.6)] ml-0.5">{users.length}</span>}
+                                                          </button>
+                                                        );
+                                                      })}
+                                                    </div>
+                                                  </div>
+                                                </div>
+                                              </div>
+                                            );
+                                          })}
+                                          {/* Reply form inline under this specific level-1 reply */}
+                                          {replyingToId === comment.id && replyingToReplyId === reply.id && (
+                                            <div className="pt-1">
+                                              {makeReplyForm(reply.id)}
+                                            </div>
+                                          )}
+                                        </div>
+                                      )}
                                     </div>
                                   );
                                 })}

@@ -1288,6 +1288,7 @@ function HomePage({ currentUser, setCurrentUser, isDarkMode, setIsDarkMode }: { 
           onCommentClick={handleMovieClick}
           onClose={() => setShowAllComments(false)}
           isDarkMode={isDarkMode}
+          onRefresh={loadComments}
         />
       )}
 
