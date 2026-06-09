@@ -1096,35 +1096,30 @@ function HomePage({ currentUser, setCurrentUser, isDarkMode, setIsDarkMode }: { 
   };
 
   const handleDeleteComment = async (movieId: number, commentId: string) => {
-    const updatedComments = comments.filter(c => c.id !== commentId);
-    
-    try {
-      const response = await fetch(`${API_BASE_URL}/comments/${movieId}/${commentId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${publicAnonKey}`,
-        },
-      });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      if (data.success) {
-        setComments(updatedComments);
-        
-      } else {
-        console.error('Error deleting comment from backend:', data.error);
-        setComments(updatedComments);
-        
-      }
-    } catch (error) {
-      console.error('Error deleting comment from backend, deleting from localStorage only:', error);
-      setComments(updatedComments);
-      
+  try {
+    const response = await fetch(`${API_BASE_URL}/comments/${movieId}/${commentId}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${publicAnonKey}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
-  };
+
+    const data = await response.json();
+
+    if (data.success) {
+      await loadComments(); // ✅ ALWAYS reload from backend
+    } else {
+      console.error('Error deleting comment from backend:', data.error);
+    }
+
+  } catch (error) {
+    console.error('Error deleting comment from backend:', error);
+  }
+};
 
   // Get all unique tags from movies (memoized)
   const allTags = useMemo(() => 
