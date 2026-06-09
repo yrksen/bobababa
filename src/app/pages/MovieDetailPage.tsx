@@ -1755,79 +1755,68 @@ export function MovieDetailPage({ currentUser, setCurrentUser }: MovieDetailPage
                                         </div>
                                       </div>
 
-                                      {/* ── Level-2 sub-thread: one per each reply being replied to ── */}
-                                      {(subReplies.length > 0 || (replyingToId === comment.id && replyingToReplyId === reply.id)) && (
-                                        <div className="ml-7 mt-1 space-y-1 border-l-2 border-[rgba(208,115,57,0.12)] dark:border-[rgba(126,62,21,0.2)] pl-3">
-                                          {subReplies.map((subReply) => {
-                                            const subReplyReactions = reactions[String(subReply.id)] || {};
-                                            return (
-                                              <div key={subReply.id} className="border border-[rgba(208,115,57,0.08)] dark:border-[rgba(126,62,21,0.12)] rounded-lg p-2.5 bg-[rgba(238,167,122,0.03)] dark:bg-[rgba(126,62,21,0.04)]">
-                                                <div className="flex items-start gap-2">
-                                                  <div className={`w-6 h-6 rounded-full flex items-center justify-center overflow-hidden shrink-0 ${isDarkMode ? 'bg-[rgba(126,62,21,0.25)]' : 'bg-[rgba(208,115,57,0.12)]'}`}>
-                                                    {subReply.profilePicture ? <img src={subReply.profilePicture} alt={subReply.username} className="w-full h-full object-cover" /> : <User className="size-3 text-[rgba(16,11,9,0.5)] dark:text-[rgba(247,241,237,0.5)]" />}
-                                                  </div>
-                                                  <div className="flex-1 min-w-0">
-                                                    <div className="flex justify-between items-start mb-0.5">
-                                                      <div className="flex items-baseline gap-1 flex-wrap">
-                                                        <span className="font-semibold text-[#100b09] dark:text-[#f7f1ed] text-[11px]">{subReply.username}</span>
-                                                        <span className="text-[rgba(208,115,57,0.9)] dark:text-[rgba(195,106,50,0.9)] text-[10px]">@{reply.username}</span>
-                                                        <span className="text-[10px] text-[rgba(16,11,9,0.4)] dark:text-[rgba(247,241,237,0.4)]">{new Date(subReply.timestamp).toLocaleDateString()}</span>
-                                                      </div>
-                                                      <button onClick={() => handleDeleteComment(subReply.id, subReply.username)} className="text-red-500/50 hover:text-red-600 dark:text-red-500/40 dark:hover:text-red-400 transition-colors ml-1 shrink-0"><Trash2 className="size-2.5" /></button>
-                                                    </div>
-                                                    {subReply.text && <p className="text-[rgba(16,11,9,0.75)] dark:text-[rgba(247,241,237,0.75)] text-[11px] leading-relaxed">{subReply.text}</p>}
-                                                    {subReply.imageUrl && <img src={subReply.imageUrl} alt="sub-reply media" className="mt-1.5 max-h-36 rounded-lg object-contain border border-[rgba(208,115,57,0.15)]" onError={(e) => e.currentTarget.style.display = 'none'} />}
-                                                    <div className="flex items-center justify-between gap-0.5 mt-1.5">
-                                                      {EMOJIS.map(emoji => {
-                                                        const users = subReplyReactions[emoji] || [];
-                                                        const hasReacted = users.includes(userId);
-                                                        return (
-                                                          <button key={emoji} onClick={() => handleReact(subReply.id, emoji)} className={`flex items-center gap-0.5 px-1 py-0.5 rounded-full text-[11px] transition-all ${hasReacted ? 'bg-[rgba(208,115,57,0.2)] border border-[rgba(208,115,57,0.5)]' : 'border border-transparent hover:bg-[rgba(238,167,122,0.12)] dark:hover:bg-[rgba(126,62,21,0.15)]'}`}>
-                                                            <span>{emoji}</span>
-                                                            {users.length > 0 && <span className="text-[9px] font-medium text-[rgba(16,11,9,0.6)] dark:text-[rgba(247,241,237,0.6)] ml-0.5">{users.length}</span>}
-                                                          </button>
-                                                        );
-                                                      })}
-                                                      <div className="flex items-center gap-1">
- <button
-  onClick={() => { setReplyingToId(comment.id); setReplyingToReplyId(subReply.id); setReplyingToUsername(subReply.username); setReplyText(''); setReplyImageUrl(''); setShowReplyImageInput(false); }}
-  className="text-[rgba(16,11,9,0.3)] dark:text-[rgba(247,241,237,0.3)] hover:text-[#d07339] dark:hover:text-[#c36a32] transition-colors flex items-center gap-1 text-[10px] ml-auto hover:opacity-70"
->
-  <Reply className="size-2.5" />Reply
-</button>
-</div>
-                                                   </div>
-
-                                                </div>
-                                              </div>
-                                            );
-                                          })}
-                                          {/* Reply form inline under this specific level-1 reply */}
-                                          {replyingToId === comment.id && replyingToReplyId === reply.id && (
-                                            <div className="pt-1">
-                                              {makeReplyForm(reply.id)}
-                                            </div>
-                                          )}
-                                          {/* Reply form inline under this specific level-2 reply */}
-{replyingToId === comment.id && replyingToReplyId === subReply.id && (
-  <div className="ml-7 mt-1 pl-3 border-l-2 border-[rgba(208,115,57,0.12)] dark:border-[rgba(126,62,21,0.2)]">
-    {makeReplyForm(subReply.id)}
-  </div>
-)}
-                                        </div>
-                                      )}
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })
-                  )}
+                                    {/* ── Level-2 sub-thread: one per each reply being replied to ── */}
+{(subReplies.length > 0 || (replyingToId === comment.id && replyingToReplyId === reply.id)) && (
+  <div className="ml-7 mt-1 space-y-1 border-l-2 border-[rgba(208,115,57,0.12)] dark:border-[rgba(126,62,21,0.2)] pl-3">
+    {subReplies.map((subReply) => {
+      const subReplyReactions = reactions[String(subReply.id)] || {};
+      return (
+        <>
+          <div key={subReply.id} className="border border-[rgba(208,115,57,0.08)] dark:border-[rgba(126,62,21,0.12)] rounded-lg p-2.5 bg-[rgba(238,167,122,0.03)] dark:bg-[rgba(126,62,21,0.04)]">
+            <div className="flex items-start gap-2">
+              <div className={`w-6 h-6 rounded-full flex items-center justify-center overflow-hidden shrink-0 ${isDarkMode ? 'bg-[rgba(126,62,21,0.25)]' : 'bg-[rgba(208,115,57,0.12)]'}`}>
+                {subReply.profilePicture ? <img src={subReply.profilePicture} alt={subReply.username} className="w-full h-full object-cover" /> : <User className="size-3 text-[rgba(16,11,9,0.5)] dark:text-[rgba(247,241,237,0.5)]" />}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex justify-between items-start mb-0.5">
+                  <div className="flex items-baseline gap-1 flex-wrap">
+                    <span className="font-semibold text-[#100b09] dark:text-[#f7f1ed] text-[11px]">{subReply.username}</span>
+                    <span className="text-[rgba(208,115,57,0.9)] dark:text-[rgba(195,106,50,0.9)] text-[10px]">@{reply.username}</span>
+                    <span className="text-[10px] text-[rgba(16,11,9,0.4)] dark:text-[rgba(247,241,237,0.4)]">{new Date(subReply.timestamp).toLocaleDateString()}</span>
+                  </div>
+                  <button onClick={() => handleDeleteComment(subReply.id, subReply.username)} className="text-red-500/50 hover:text-red-600 dark:text-red-500/40 dark:hover:text-red-400 transition-colors ml-1 shrink-0"><Trash2 className="size-2.5" /></button>
+                </div>
+                {subReply.text && <p className="text-[rgba(16,11,9,0.75)] dark:text-[rgba(247,241,237,0.75)] text-[11px] leading-relaxed">{subReply.text}</p>}
+                {subReply.imageUrl && <img src={subReply.imageUrl} alt="sub-reply media" className="mt-1.5 max-h-36 rounded-lg object-contain border border-[rgba(208,115,57,0.15)]" onError={(e) => e.currentTarget.style.display = 'none'} />}
+                <div className="flex items-center justify-between gap-0.5 mt-1.5">
+                  {EMOJIS.map(emoji => {
+                    const users = subReplyReactions[emoji] || [];
+                    const hasReacted = users.includes(userId);
+                    return (
+                      <button key={emoji} onClick={() => handleReact(subReply.id, emoji)} className={`flex items-center gap-0.5 px-1 py-0.5 rounded-full text-[11px] transition-all ${hasReacted ? 'bg-[rgba(208,115,57,0.2)] border border-[rgba(208,115,57,0.5)]' : 'border border-transparent hover:bg-[rgba(238,167,122,0.12)] dark:hover:bg-[rgba(126,62,21,0.15)]'}`}>
+                        <span>{emoji}</span>
+                        {users.length > 0 && <span className="text-[9px] font-medium text-[rgba(16,11,9,0.6)] dark:text-[rgba(247,241,237,0.6)] ml-0.5">{users.length}</span>}
+                      </button>
+                    );
+                  })}
+                  <button
+                    onClick={() => { setReplyingToId(comment.id); setReplyingToReplyId(subReply.id); setReplyingToUsername(subReply.username); setReplyText(''); setReplyImageUrl(''); setShowReplyImageInput(false); }}
+                    className="text-[rgba(16,11,9,0.3)] dark:text-[rgba(247,241,237,0.3)] hover:text-[#d07339] dark:hover:text-[#c36a32] transition-colors flex items-center gap-1 text-[10px] ml-auto hover:opacity-70"
+                  >
+                    <Reply className="size-2.5" />Reply
+                  </button>
                 </div>
               </div>
             </div>
+          </div>
+
+          {/* Reply form inline under this specific level-2 reply */}
+          {replyingToId === comment.id && replyingToReplyId === subReply.id && (
+            <div className="ml-7 mt-1 pl-3 border-l-2 border-[rgba(208,115,57,0.12)] dark:border-[rgba(126,62,21,0.2)]">
+              {makeReplyForm(subReply.id)}
+            </div>
+          )}
+        </>
+      );
+    })}
+    {/* Reply form inline under this specific level-1 reply */}
+    {replyingToId === comment.id && replyingToReplyId === reply.id && (
+      <div className="pt-1">
+        {makeReplyForm(reply.id)}
+      </div>
+    )}
+  </div>
+)}
 
             {/* Right Column - Tags + Recommended (plain static column) */}
             <div className="space-y-6">
