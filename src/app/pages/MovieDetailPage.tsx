@@ -1788,14 +1788,15 @@ export function MovieDetailPage({ currentUser, setCurrentUser }: MovieDetailPage
                                                           </button>
                                                         );
                                                       })}
-                                                   </div>
-<button
+                                                      <button
   onClick={() => { setReplyingToId(comment.id); setReplyingToReplyId(subReply.id); setReplyingToUsername(subReply.username); setReplyText(''); setReplyImageUrl(''); setShowReplyImageInput(false); }}
   className="text-[rgba(16,11,9,0.3)] dark:text-[rgba(247,241,237,0.3)] hover:text-[#d07339] dark:hover:text-[#c36a32] transition-colors flex items-center gap-1 text-[10px] ml-auto hover:opacity-70"
 >
   <Reply className="size-2.5" />Reply
 </button>
 </div>
+                                                   </div>
+
                                                 </div>
                                               </div>
                                             );
